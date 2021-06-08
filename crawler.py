@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from bs4 import BeautifulSoup  # install BeautifulSoup4
 import requests  # install requests and lxml
 import pandas as pd
