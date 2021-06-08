@@ -3,8 +3,8 @@ from bs4 import BeautifulSoup  # install BeautifulSoup4
 import requests  # install requests and lxml
 import pandas as pd
 import urllib.request
-import scrapy
 import json
+from datetime import datetime
 
 def robot(url):  # returns disallowed contents
     robots_url = url + '/robots.txt'
@@ -46,33 +46,37 @@ def crawler(seed, num_page, num_level):
     return queue
     # print(queue)
 
+def get_body_text(link):
+    html = urllib.request.urlopen(link)
+    page_soup = BeautifulSoup(html, "html.parser")
+    body_soup = page_soup.main
+    containers = body_soup.find_all("p")
+    str = ''
+    for para in containers:
+        str += para.get_text()
+        str += '\n'
+        #print(para.get_text())
+    return str
 
-seed_url = 'https://www.ucr.edu'
-#print(crawler(seed_url, 20, 2))
-first = crawler(seed_url, 20, 2)[0]
-link = 'https://news.ucr.edu/articles/2021/06/03/ucr-joins-forces-nasa-missions-venus'
-html = urllib.request.urlopen(link)
-page_soup = BeautifulSoup(html, "html.parser")
-body_soup = page_soup.main
-containers = body_soup.find_all("p")
-for para in containers:
-    # print(para)
-    print(para.get_text())
+link = 'https://www.ucr.edu/'
+link1 = 'https://news.ucr.edu/articles/2021/06/01/2021-voices-grads-share-pivotal-moments-their-educational-journeys'
+print(get_body_text(link1))
 
-#print(first)
-# body is stored in <p>
-#url = 'https://www.ucr.edu' #'https://news.ucr.edu/articles/2021/06/03/ucr-joins-forces-nasa-missions-venus'
-#html = urllib.request.urlopen(url)
-#htmlParse = BeautifulSoup(first., 'html.parser')
-#for para in htmlParse.find_all("p"): #body.div.main
-#   print(para.get_text())
-#robot(seed_url)
 
-# class jeffbullasSpider(scrapy.Spider):
-#     name = "jeffbullas"
-#     allowed_domains = ["jeffbullas.com"]
-#     start_urls = [
-#         "http://www.jeffbullas.com/2014/12/19/10-ways-to-succeed-in-the-new-age-of-mobile-content-marketing/"]
-#
-#     def parse(self, response):
-#         print.xpath('//body//p//text()').extract()
+# ========================================
+list = crawler() # seed, num_page, num_level
+with open("docs.json", "w") as outfile:
+    for link in list:
+        url = link
+        title = "blah"
+        text = get_body_text(link)
+        author = ""
+        doc = {
+                'url': url, # url
+                'page_title': title, # extract webpage name
+                'text': text, # html body text
+                'timestamp': datetime.now(),  # current date or maybe webpage date
+                'author': author
+        }
+        json_object = json.dumps(doc, indent=4)  #convert library to json obj
+        outfile.write(json_object)
