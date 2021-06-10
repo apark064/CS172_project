@@ -5,10 +5,13 @@ import pandas as pd
 import urllib.request
 import json
 from datetime import datetime
+from time import sleep
+from elasticsearch import Elasticsearch, helpers
+
 
 def robot(url):  # returns disallowed contents
     robots_url = url + '/robots.txt'
-    print(robots_url)
+    #print(robots_url)
     robots = requests.get(robots_url).text
     data = []
     lines = str(robots).splitlines()
@@ -49,7 +52,10 @@ def crawler(seed, num_page, num_level):
 def get_body_text(link):
     html = urllib.request.urlopen(link)
     page_soup = BeautifulSoup(html, "html.parser")
-    body_soup = page_soup.main
+    if page_soup.main:
+        body_soup = page_soup.main
+    else:
+        body_soup = page_soup
     containers = body_soup.find_all("p")
     str = ''
     for para in containers:
@@ -60,23 +66,43 @@ def get_body_text(link):
 
 link = 'https://www.ucr.edu/'
 link1 = 'https://news.ucr.edu/articles/2021/06/01/2021-voices-grads-share-pivotal-moments-their-educational-journeys'
-print(get_body_text(link1))
+#print(get_body_text(link1))
 
 
 # ========================================
-list = crawler() # seed, num_page, num_level
-with open("docs.json", "w") as outfile:
-    for link in list:
-        url = link
-        title = "blah"
-        text = get_body_text(link)
-        author = ""
-        doc = {
-                'url': url, # url
-                'page_title': title, # extract webpage name
-                'text': text, # html body text
-                'timestamp': datetime.now(),  # current date or maybe webpage date
-                'author': author
-        }
-        json_object = json.dumps(doc, indent=4)  #convert library to json obj
-        outfile.write(json_object)
+
+list = crawler(link, 10, 2) # seed, num_page, num_level
+print('list :')
+print(list)
+
+elastic_pass = "HdEPP9nkrjsbs0fy7sb7Dztm"
+elastic_endpoint = "i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243"
+
+
+# "i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243"
+
+connection_string = "https://elastic:" + elastic_pass + "@" + elastic_endpoint
+
+indexName = "cs172-index"
+esConn = Elasticsearch(connection_string)
+response = esConn.indices.create(index=indexName, ignore=400)  # create index
+print(response)  # status
+
+
+for link in list:
+    # with open("docs.json", "w") as outfile:
+    url = link
+    # title = "blah"
+    text = get_body_text(link)
+    # author = ""
+    doc = {
+            'url': url,  # url
+            # 'page_title': title, # extract webpage name
+            'text': text,  # html body text
+            'timestamp': datetime.now()  # current date or maybe webpage date
+            # 'author': author
+    }
+    # json_object = json.dumps(doc, indent=4)  #convert library to json obj
+    response = esConn.index(index=indexName, id=id, body=doc)  # add doc to index
+    print(response)  # result status
+
