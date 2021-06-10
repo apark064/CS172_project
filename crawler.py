@@ -92,9 +92,9 @@ def sort_list_by_time(list):  # make priority queue by last-updated-time. If not
 
 link = 'https://www.ucr.edu/'
 list = crawler(link, 10, 2)
-print(list)
-print(sort_list_by_time(list))
-print('end')
+#print(list)
+#print(sort_list_by_time(list))
+#print('end')
 
 link = 'https://www.ucr.edu/'
 link1 = 'https://news.ucr.edu/articles/2021/06/01/2021-voices-grads-share-pivotal-moments-their-educational-journeys'
@@ -117,12 +117,13 @@ connection_string = "https://elastic:" + elastic_pass + "@" + elastic_endpoint
 
 indexName = "myindex_1"  # "cs172-index"
 esConn = Elasticsearch(connection_string)
+esConn.indices.delete(index=indexName, ignore=[400, 404])
 response = esConn.indices.create(index=indexName, ignore=400)  # create index
 print(response)  # status
 
 
 for link in list:
-    url = link
+    url = link #link = url
     # title = "blah"
     text = get_body_text(link)
     # author = ""
@@ -133,8 +134,9 @@ for link in list:
             'timestamp': datetime.now()  # current date or maybe webpage date
             # 'author': author
     }
+    #print(doc)
     # json_object = json.dumps(doc, indent=4)  #convert library to json obj
-    response = esConn.index(index=indexName, id=id, body=doc)  # add doc to index
+    response = esConn.index(index=indexName, body=doc)  # add doc to index
     print(response)  # result status
 
 response = esConn.search(index=indexName, body={"query": {"match_all": {}}})
@@ -155,8 +157,8 @@ response = esConn.search(index=indexName, body={
 print(response)  # result status
 
 
-
-#curl -X PUT -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex?pretty"    <-- cretate "myindex"
+#curl -X PUT -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex_1?pretty"    <-- cretate "myindex"
 #curl -X DELETE -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex?pretty"    <-- delete "myindex"
+#curl -X GET <username>:<password> <endpoint>/_search?pretty" -H "Content-Type: application/json" -d"{\"query\": {\"match_all\": { }}}"
 
-
+#curl -X GET  -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex_1/_search?pretty" -H "Content-Type: application/json" -d"{\"query\": {\"match_all\": { }}}"
