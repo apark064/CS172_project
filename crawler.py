@@ -168,11 +168,12 @@ def elas(seed_url, query):
                 }
             }
         })
-    for i in range(len(response['hits']['hits'])):
-        print('Document ' + str(i + 1))
-        print('    ID: ' + response['hits']['hits'][i]['_id'])  # result status
-        print('    Score: ' + str(response['hits']['hits'][i]['_score']))
-        print('    URL: ' + response['hits']['hits'][i]['_source']['url'])
+    return response['hits']['hits']
+    # for i in range(len(response['hits']['hits'])):
+    #     print('Document ' + str(i + 1))
+    #     print('    ID: ' + response['hits']['hits'][i]['_id'])  # result status
+    #     print('    Score: ' + str(response['hits']['hits'][i]['_score']))
+    #     print('    URL: ' + response['hits']['hits'][i]['_source']['url'])
 
 
 #curl -X PUT -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex_1?pretty"    <-- cretate "myindex"

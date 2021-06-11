@@ -1,1 +1,2 @@
-# CS172_project
+# CS172 Final Project
+
