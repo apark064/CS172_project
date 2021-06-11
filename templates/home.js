@@ -6,8 +6,12 @@ function getInputValue(){
     seed_url = document.getElementById("input_url").value;
     query = document.getElementById("input_query").value;
 
-    console.log(seed_url)
-    console.log(query)
+    console.log(seed_url) // <-- do something different
+    console.log(query) //
+
+    //
+    // response = esConn.search(index=indexName, body={"query": {"match_all": {}}})
+    //
 }
 
 

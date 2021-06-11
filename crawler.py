@@ -9,6 +9,7 @@ from datetime import datetime
 from time import sleep
 from elasticsearch import Elasticsearch, helpers
 import ssl
+from flask import Flask
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -45,7 +46,7 @@ def crawler(seed, num_page, num_level):
         for url in soup.find_all('a', href=True):  # need to fix
             if url not in disallowed:  # avoid disallowed contents from robots.txt
                 if iter_page < num_page:
-                    if url not in queue:  # URL Duplicate Reduction
+                    if url.get('href') not in queue:  # URL Duplicate Reduction
                         if 'http' in url.get('href'):
                             if iter_page % 10 == 0:  # add delay every 10
                                 time.sleep(5)
@@ -94,6 +95,17 @@ def sort_list_by_time(list):  # make priority queue by last-updated-time. If not
     return return_list + list_without_update
 
 
+def get_title(link):
+    html = urllib.request.urlopen(link)
+    page_soup = BeautifulSoup(html, "html.parser")
+    if page_soup.head:
+        title = page_soup.head.find("meta", property="og:title")
+    else:
+        title = ''
+
+    return title
+
+
 #print(list)
 #print(sort_list_by_time(list))
 #print('end')
@@ -103,61 +115,64 @@ def sort_list_by_time(list):  # make priority queue by last-updated-time. If not
 
 
 # ========================================
+def elas(seed_url, query):
+    print('start')
+    #link = 'https://www.ucr.edu/'
+    list = crawler(seed_url, 30, 5)
+    print('list :')
+    print(list)
 
-print('start')
-link = 'https://www.ucr.edu/'
-list = crawler(link, 21, 3)
-print('list :')
-print(list)
-
-elastic_pass = "HdEPP9nkrjsbs0fy7sb7Dztm"
-elastic_endpoint = "i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243"
-
-
-# "i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243"
-
-connection_string = "https://elastic:" + elastic_pass + "@" + elastic_endpoint
-
-indexName = "myindex_1"  # "cs172-index"
-esConn = Elasticsearch(connection_string)
-esConn.indices.delete(index=indexName, ignore=[400, 404])
-response = esConn.indices.create(index=indexName, ignore=400)  # create index
-print(response)  # status
+    elastic_pass = "HdEPP9nkrjsbs0fy7sb7Dztm"
+    elastic_endpoint = "i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243"
 
 
-for link in list:
-    url = link #link = url
-    # title = "blah"
-    text = get_body_text(link)
-    # author = ""
-    doc = {
-            'url': url,  # url
-            # 'page_title': title, # extract webpage name
-            'text': text,  # html body text
-            'timestamp': datetime.now()  # current date or maybe webpage date
-            # 'author': author
-    }
-    #print(doc)
-    # json_object = json.dumps(doc, indent=4)  #convert library to json obj
-    response = esConn.index(index=indexName, body=doc)  # add doc to index
-    print(response)  # result status
+    # "i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243"
 
-response = esConn.search(index=indexName, body={"query": {"match_all": {}}})
-print(response)  # result status
+    connection_string = "https://elastic:" + elastic_pass + "@" + elastic_endpoint
 
-# think this is how we look up a query?
+    indexName = "myindex_1"  # "cs172-index"
+    esConn = Elasticsearch(connection_string)
+    esConn.indices.delete(index=indexName, ignore=[400, 404])
+    response = esConn.indices.create(index=indexName, ignore=400)  # create index
+    print(response)  # status
 
 
-query = "international"
-response = esConn.search(index=indexName, body={
-        'query': {
-            'match': {
-                "text": query
-            }
+    for link in list:
+        url = link #link = url
+        #title = get_title(link)
+        text = get_body_text(link)
+        # author = ""
+        doc = {
+                'url': url,  # url
+                #'page_title': title, # extract webpage name
+                'text': text,  # html body text
+                'timestamp': datetime.now()  # current date or maybe webpage date
+                # 'author': author
         }
-    })
+        #print(doc)
+        # json_object = json.dumps(doc, indent=4)  #convert library to json obj
+        response = esConn.index(index=indexName, body=doc)  # add doc to index
+        print(response)  # result status
 
-print(response)  # result status
+    response = esConn.search(index=indexName, body={"query": {"match_all": {}}})
+    # print(response)  # result status
+
+    # think this is how we look up a query?
+
+
+    #query = "international"
+    response = esConn.search(index=indexName, body={
+            'query': {
+                'match': {
+                    "text": query
+                }
+            }
+        })
+    for i in range(len(response['hits']['hits'])):
+        print('Document ' + str(i + 1))
+        print('    ID: ' + response['hits']['hits'][i]['_id'])  # result status
+        print('    Score: ' + str(response['hits']['hits'][i]['_score']))
+        print('    URL: ' + response['hits']['hits'][i]['_source']['url'])
 
 
 #curl -X PUT -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex_1?pretty"    <-- cretate "myindex"
@@ -169,17 +184,6 @@ print(response)  # result status
 
 
 
-#============== To Do =================
 
-# add delay as you crawl
-#
-
-# ↓ Masashi's testing purpose :
-# def duplicate_detection(list, word_list):
-#     for url in list:
-#         byte_list = []
-#         text = get_body_text(url)
-#         for word in text:
-#             byte_list.append(' '.join(map(bin, bytearray(word, "utf-8")))) # append bin value of 'word'
 
 
