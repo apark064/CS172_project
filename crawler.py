@@ -4,6 +4,7 @@ import requests  # install requests and lxml
 import pandas as pd
 import urllib.request
 import json
+import time
 from datetime import datetime
 from time import sleep
 from elasticsearch import Elasticsearch, helpers
@@ -46,6 +47,8 @@ def crawler(seed, num_page, num_level):
                 if iter_page < num_page:
                     if url not in queue:  # URL Duplicate Reduction
                         if 'http' in url.get('href'):
+                            if iter_page % 10 == 0:  # add delay every 10
+                                time.sleep(5)
                             queue.append(url.get('href'))
                             iter_page += 1
         # elastic search
@@ -90,20 +93,20 @@ def sort_list_by_time(list):  # make priority queue by last-updated-time. If not
 
     return return_list + list_without_update
 
-link = 'https://www.ucr.edu/'
-list = crawler(link, 10, 2)
+
 #print(list)
 #print(sort_list_by_time(list))
 #print('end')
 
-link = 'https://www.ucr.edu/'
-link1 = 'https://news.ucr.edu/articles/2021/06/01/2021-voices-grads-share-pivotal-moments-their-educational-journeys'
-# print(get_body_text(link1))
+
+#link1 = 'https://news.ucr.edu/articles/2021/06/01/2021-voices-grads-share-pivotal-moments-their-educational-journeys'
 
 
 # ========================================
 
-list = crawler(link, 10, 2) # seed, num_page, num_level
+print('start')
+link = 'https://www.ucr.edu/'
+list = crawler(link, 21, 3)
 print('list :')
 print(list)
 
@@ -145,7 +148,7 @@ print(response)  # result status
 # think this is how we look up a query?
 
 
-query = "blah"
+query = "international"
 response = esConn.search(index=indexName, body={
         'query': {
             'match': {
@@ -162,3 +165,21 @@ print(response)  # result status
 #curl -X GET <username>:<password> <endpoint>/_search?pretty" -H "Content-Type: application/json" -d"{\"query\": {\"match_all\": { }}}"
 
 #curl -X GET  -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex_1/_search?pretty" -H "Content-Type: application/json" -d"{\"query\": {\"match_all\": { }}}"
+
+
+
+
+#============== To Do =================
+
+# add delay as you crawl
+#
+
+# ↓ Masashi's testing purpose :
+# def duplicate_detection(list, word_list):
+#     for url in list:
+#         byte_list = []
+#         text = get_body_text(url)
+#         for word in text:
+#             byte_list.append(' '.join(map(bin, bytearray(word, "utf-8")))) # append bin value of 'word'
+
+
