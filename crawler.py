@@ -52,6 +52,12 @@ def crawler(seed, num_page, num_level):
                                 time.sleep(5)
                             queue.append(url.get('href'))
                             iter_page += 1
+                        elif '/wiki/' in url.get('href'):
+                            if iter_page % 10 == 0:  # add delay every 10
+                                time.sleep(5)
+                            wiki_url = 'https://en.wikipedia.org' + url.get('href')
+                            queue.append(wiki_url)
+                            iter_page += 1
         # elastic search
     return queue
     # print(queue)
@@ -118,7 +124,7 @@ def get_title(link):
 def elas(seed_url, query):
     print('start')
     #link = 'https://www.ucr.edu/'
-    list = crawler(seed_url, 30, 5)
+    list = crawler(seed_url, 200, 15)
     print('list :')
     print(list)
 

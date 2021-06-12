@@ -11,10 +11,11 @@ def index():
         seed_url = request.form['seed_url']
         query = request.form['query']
         dict = {'seed': seed_url, 'query': query}
-
+        print('a')
         output = ""
         # call ES with seed_url, query
         outputVal = crawler.elas(seed_url, query)
+        print('b')
         for i in range(len(outputVal)):
             print('Document ' + str(i + 1))
             print('    ID: ' + outputVal[i]['_id'])  # result status
@@ -24,7 +25,7 @@ def index():
             print(urlOutput)
             # print('    Score: ' + str(outputVal[i]['_score']))
             # print('    URL: ' + outputVal[i]['_source']['url'])
-            output += scoreOutput + urlOutput + "\n"
+            output += scoreOutput + urlOutput + "<br>"
         print("================================================ \n" + output)
         return output
 
