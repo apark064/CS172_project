@@ -79,7 +79,7 @@ def get_body_text(link):
     return str
 
 
-def sort_list_by_time():  # make priority queue by last-updated-time. If not, append back in same order traversed
+def sort_list_by_time(list):  # make priority queue by last-updated-time. If not, append back in same order traversed
     # <head> .. <meta property="og:updated_time" content="2021-06-02T16:43:53-0700">
     p_queue = []
     list_without_update = []
@@ -89,7 +89,7 @@ def sort_list_by_time():  # make priority queue by last-updated-time. If not, ap
         exist = page_soup.head.find("meta", property="og:updated_time")
         if exist:
             p_queue.append([exist["content"], item]) #time, url
-            print(p_queue)
+            #print(p_queue)
         else:
             list_without_update.append(item)
 
@@ -114,9 +114,8 @@ def get_title(link):
 # ========================================
 def elas(seed_url, query):
     print('start')
-    #link = 'https://www.ucr.edu/'
-    list = crawler(seed_url, 50, 15)
-    # sort_list_by_time()   # <-- sort list by 'last-updated-time'
+    list = crawler(seed_url, 50, 15) # change num_page and num_level as you like
+    sort_list_by_time(list)   # <-- sort list by 'last-updated-time'
     print('list :')
     print(list)
 
