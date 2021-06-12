@@ -10,12 +10,13 @@ def index():
     if request.method == 'POST':
         seed_url = request.form['seed_url']
         query = request.form['query']
+        # _p_q = request.form['checkbox']
         dict = {'seed': seed_url, 'query': query}
-        print('a')
+        #print('a')
         output = ""
         # call ES with seed_url, query
         outputVal = crawler.elas(seed_url, query)
-        print('b')
+        #print('b')
         for i in range(len(outputVal)):
             print('Document ' + str(i + 1))
             print('    ID: ' + outputVal[i]['_id'])  # result status

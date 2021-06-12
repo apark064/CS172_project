@@ -52,10 +52,10 @@ def crawler(seed, num_page, num_level):
                                 time.sleep(5)
                             queue.append(url.get('href'))
                             iter_page += 1
-                        elif '/wiki/' in url.get('href'):
+                        elif '/wiki/' in url.get('href'): # wikipedia uses shortcut to remove 'https://en ...'
                             if iter_page % 10 == 0:  # add delay every 10
                                 time.sleep(5)
-                            wiki_url = 'https://en.wikipedia.org' + url.get('href')
+                            wiki_url = 'https://en.wikipedia.org' + url.get('href') # adding 'https...' to give "original" link
                             queue.append(wiki_url)
                             iter_page += 1
         # elastic search
@@ -79,7 +79,7 @@ def get_body_text(link):
     return str
 
 
-def sort_list_by_time(list):  # make priority queue by last-updated-time. If not, append back in same order traversed
+def sort_list_by_time():  # make priority queue by last-updated-time. If not, append back in same order traversed
     # <head> .. <meta property="og:updated_time" content="2021-06-02T16:43:53-0700">
     p_queue = []
     list_without_update = []
@@ -111,20 +111,12 @@ def get_title(link):
 
     return title
 
-
-#print(list)
-#print(sort_list_by_time(list))
-#print('end')
-
-
-#link1 = 'https://news.ucr.edu/articles/2021/06/01/2021-voices-grads-share-pivotal-moments-their-educational-journeys'
-
-
 # ========================================
 def elas(seed_url, query):
     print('start')
     #link = 'https://www.ucr.edu/'
-    list = crawler(seed_url, 200, 15)
+    list = crawler(seed_url, 50, 15)
+    # sort_list_by_time()   # <-- sort list by 'last-updated-time'
     print('list :')
     print(list)
 
@@ -163,9 +155,6 @@ def elas(seed_url, query):
     response = esConn.search(index=indexName, body={"query": {"match_all": {}}})
     # print(response)  # result status
 
-    # think this is how we look up a query?
-
-
     #query = "international"
     response = esConn.search(index=indexName, body={
             'query': {
@@ -185,7 +174,6 @@ def elas(seed_url, query):
 #curl -X PUT -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex_1?pretty"    <-- cretate "myindex"
 #curl -X DELETE -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex?pretty"    <-- delete "myindex"
 #curl -X GET <username>:<password> <endpoint>/_search?pretty" -H "Content-Type: application/json" -d"{\"query\": {\"match_all\": { }}}"
-
 #curl -X GET  -u elastic:HdEPP9nkrjsbs0fy7sb7Dztm "https://i-o-optimized-deployment-753d85.es.us-west1.gcp.cloud.es.io:9243/myindex_1/_search?pretty" -H "Content-Type: application/json" -d"{\"query\": {\"match_all\": { }}}"
 
 

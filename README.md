@@ -2,7 +2,7 @@
 
 Team members: Abraham Park, Jorge Ruiz, Kevin To, Masashi Yamaguchi
 
-Programming Language: Python, HTML, JavaScript
+Programming Language: Python, HTML
 
 ## Description
 Super Duper Crawler creates a term-base index of website and returns relevant documents to the given query from the index.
@@ -14,6 +14,7 @@ To run the program, run the following commands
 ``
 python app.py
 ``
+and type "seed URL" and "query" on the provided link
 
 ## Dependencies
 Install the following
@@ -26,5 +27,7 @@ Install the following
 
 ## Extensions
 
-- Web-based interface
-- Priority Queue by last updated time
+- Web-based interface 
+  
+- Priority Queue by last updated time : sort_list_by_time()
+    it can take more time to get the output but it is very useful for multi-threaded nodes
